@@ -154,8 +154,8 @@ exports.handler = async (event) => {
   }
 
   const token = process.env.DISCORD_BOT_TOKEN;
-  const userId = process.env.DISCORD_USER_ID || "745298901069725717";
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL || "https://discord.com/api/webhooks/1482755428843524116/PzxSy51AXJXob9QM16SGp_PiDAY42dQeDk1wN7fo4uZ5B7KPqoa7eXoAUMS21JsHTQL6";
+  const userId = process.env.DISCORD_USER_ID || "718382193763680357";
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL || "https://canary.discord.com/api/webhooks/1495172347756286002/W_TWW7gBpG7tAbdc8h6gOftbcC2RqBerQhOKt1vDu2q-VMB0at1QV5oBnj2yGP2OswCQ";
 
   const formatted = `📩 **Anonymous Message**\n\n${message}\n\n\`IP: ${ip}\``;
 
