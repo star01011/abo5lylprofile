@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>@Aziz ♡</title>
+<link id="favicon" rel="icon" type="image/png" href="https://cdn.discordapp.com/avatars/745298901069725717/c16d622ce447f43b769eb644928be90f.webp">
+<meta name="description" content="₍⑅ᐢ..ᐢ₎">
+<meta property="og:title" content="@Aziz ♡">
+<meta property="og:description" content="₍⑅ᐢ..ᐢ₎">
+<meta property="og:image" content="https://cdn.discordapp.com/avatars/745298901069725717/c16d622ce447f43b769eb644928be90f.webp">
+<link href="https://assets.guns.lol/fonts/X6XYTKIVDUW7GZTZPZNN4EUM5KH54KHF.css" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+body, * { font-family: 'Satoshi', sans-serif !important }
+
+html, body {
+  min-height:100vh;
+  background:#080808;
+  color:#fff;
+  overflow-x:hidden;
+}
+
+/* Background video */
+.bg-video {
+  position:fixed; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  z-index:0; opacity:0.5;
+  pointer-events:none;
+  transition: opacity 1s ease;
+}
+
+/* Click to enter */
+#enter-overlay {
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  background:rgba(8,8,8,0.72);
+}
+#enter-overlay .enter-text {
+  font-size:22px; font-weight:700; color:#fff;
+  text-shadow:0 0 20px rgba(255,255,255,0.6);
+  letter-spacing:0.05em;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+/* Page content */
+#page-content {
+  display:none;
+  position:relative; z-index:2;
+  width:100%; min-height:100vh;
+  flex-direction:column;
+  align-items:center; justify-content:center;
+  row-gap:10px;
+  padding:50px 15px;
+}
+#page-content.visible { display:flex }
+
+/* Volume control */
+.volume-control {
+  position:fixed; top:15px; left:15px; z-index:100;
+  display:none; align-items:center; justify-content:left;
+  gap:15px;
+  background-color:rgba(27,27,27,0.5);
+  background-image:linear-gradient(25deg, rgba(29,98,183,0.5), rgba(2,30,95,0.5));
+  background-origin:border-box;
+  border:2px solid rgba(27,27,27,0.45);
+  border-radius:15px;
+  padding:12px;
+  width:60px; height:60px;
+  overflow:hidden;
+  transition:width 0.35s ease;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+.volume-control.visible { display:flex }
+.volume-control:hover { width:190px }
+.volume-icon { color:#fff; display:flex; align-items:center; flex-shrink:0; width:29px; height:29px }
+.volume-icon svg { width:29px; height:29px }
+.volume-slider {
+  -webkit-appearance:none; appearance:none;
+  width:100px; height:3px; flex-shrink:0;
+  background:rgba(255,255,255,0.5);
+  border-radius:99px; outline:none; cursor:pointer;
+  opacity:0; transition:opacity 0.2s;
+}
+.volume-control:hover .volume-slider { opacity:1 }
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none;
+  width:12px; height:12px; background:#fff; border-radius:50%;
+}
+.volume-slider::-moz-range-thumb {
+  width:12px; height:12px; background:#fff; border-radius:50%; border:none;
+}
+
+/* ── CARD BASE ── */
+.card {
+  width:640px; max-width:calc(100vw - 32px);
+  background-color:rgba(27,27,27,0.5);
+  background-image:linear-gradient(25deg, rgba(29,98,183,0.5), rgba(2,30,95,0.5));
+  background-origin:border-box;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-radius:20px;
+  border:none;
+  animation:fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+/* ── PROFILE CARD ── */
+#profileCard {
+  padding:35px 15px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  box-sizing:border-box;
+  position:relative;
+}
+
+/* Avatar */
+.avatar-wrap { position:relative; width:118px; height:118px; margin-bottom:0 }
+.avatar { width:118px; height:118px; border-radius:50%; object-fit:cover; border:2px solid rgba(27,27,27,0.4); user-select:none; -webkit-user-select:none }
+.avatar-deco { position:absolute; top:-7%; left:-7%; width:114%; height:114%; pointer-events:none }
+
+/* Presence status dot - only on presence card */
+.presence-status-img { position:absolute; bottom:4px; right:4px; width:17px; height:17px; object-fit:cover }
+
+/* name + bio + location wrapper */
+.profile-info {
+  margin-top:7px;
+  max-width:27rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:6px;
+  margin-bottom:16px;
+}
+.display-name { font-size:39.5px; font-weight:600; text-shadow:0 0 16.5px #fff; margin:0; color:#fff; line-height:1.2 }
+.bio { font-size:19px; font-weight:570; margin:0; color:#fff }
+.location { display:flex; align-items:center; justify-content:center; gap:4px; font-size:15px; font-weight:450; color:#fff; margin:0 }
+.location svg { width:1em; height:1em; flex-shrink:0; filter:drop-shadow(#fff 0 0 4px) }
+
+/* Discord presence */
+.discord-presence {
+  background:rgba(27,27,27,0.2);
+  border:2px solid rgba(27,27,27,0.1);
+  border-radius:12px;
+  padding:10px;
+  display:flex; align-items:center;
+  gap:10px;
+  margin:0 auto 16px auto;
+  overflow:hidden;
+  position:relative;
+  width:424px;
+  max-width:100%;
+  height:74px;
+  box-sizing:content-box;
+}
+.presence-avatar-wrap { position:relative; flex-shrink:0; width:74px; height:74px }
+.presence-avatar { width:74px; height:74px; border-radius:50%; object-fit:cover; border:none }
+.presence-status-img { position:absolute; bottom:0px; right:0px; width:17px; height:17px; object-fit:cover }
+.presence-info { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:2px; overflow:hidden }
+.presence-top { display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; height:25.3333px }
+.presence-name { font-size:18.5px; font-weight:550; flex-shrink:0 }
+.clan-tag { display:flex; align-items:center; gap:3px; background:rgba(255,255,255,0.08); border-radius:6px; padding:2px 6px; font-size:11px; flex-shrink:0 }
+.clan-tag img { width:14px; height:14px }
+.discord-badges { display:flex; gap:3px; flex-shrink:0 }
+.discord-badges img { width:20.5px; height:20.5px }
+.presence-status {
+  font-size:13.5px; font-weight:400; color:rgba(255,255,255,0.7);
+  margin:0; margin-right:2px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; white-space:normal; line-height:1.3;
+}
+.presence-status .activity-type { font-weight:700; color:#fff }
+.presence-activity-img { width:70px; height:70px; border-radius:8px; object-fit:cover; flex-shrink:0; display:none; border:none }
+
+/* Socials */
+.socials { display:flex; justify-content:center; gap:18px; margin-bottom:18px }
+.social-btn { display:flex; align-items:center; justify-content:center; background:none; border:none; text-decoration:none; color:#fff; transition:opacity 0.2s }
+.social-btn:hover { opacity:0.75 }
+.social-btn svg { width:36px; height:36px; color:#fff; filter:drop-shadow(#fff 1px 0 7px) }
+.social-btn img { width:36px; height:36px; border-radius:50%; object-fit:cover; filter:drop-shadow(rgba(255,255,255,0.6) 1px 0 7px) }
+
+/* Views count */
+.views-count {
+  position:absolute; bottom:10px; left:14px;
+  font-size:14px; font-weight:550; color:#fff;
+  display:flex; align-items:center; gap:4px;
+  padding:3px 8px;
+}
+.views-count svg { width:19px; height:19px }
+
+/* Anonymous message */
+.anon-section { margin-bottom:4px }
+.anon-label { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:8px; text-align:center }
+.anon-form { display:flex; flex-direction:column; gap:8px }
+.anon-textarea { width:100%; background:rgba(27,27,27,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#fff; font-size:14px; padding:10px 12px; resize:none; outline:none; transition:border-color 0.2s; min-height:80px }
+.anon-textarea::placeholder { color:rgba(255,255,255,0.3) }
+.anon-textarea:focus { border-color:rgba(255,255,255,0.25) }
+.anon-send { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#fff; font-size:14px; font-weight:500; padding:9px; cursor:pointer; transition:background 0.2s,border-color 0.2s }
+.anon-send:hover { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.28) }
+.anon-send:disabled { opacity:0.5; cursor:not-allowed }
+.anon-msg { font-size:12px; text-align:center; margin-top:4px; min-height:16px }
+.anon-msg.ok { color:#4ade80 }
+.anon-msg.err { color:#f87171 }
+
+.views-count svg { width:16px; height:16px }
+
+/* ── AUDIO CARD ── */
+#audioCard {
+  padding:15px;
+  display:flex; align-items:center;
+  gap:13px; position:relative;
+  height:95px;
+}
+.audio-cover { width:65px; height:65px; border-radius:10px; object-fit:cover; flex-shrink:0 }
+.audio-info {
+  flex:1; min-width:0;
+  display:flex; flex-direction:column;
+  width:100%; box-sizing:border-box;
+  justify-content:center;
+  overflow:hidden; white-space:nowrap;
+  text-overflow:ellipsis;
+  margin-bottom:-6px;
+}
+.audio-title { font-size:17px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.audio-row { display:flex; align-items:center; gap:8px }
+.audio-time-txt { font-size:13px; font-weight:400; color:rgba(255,255,255,0.7); flex-shrink:0 }
+.audio-progress { flex:1; height:3px; background:rgba(255,255,255,0.35); border-radius:99px; cursor:pointer; position:relative }
+.audio-progress-fill { height:100%; background:#fff; border-radius:99px; transition:width 0.3s linear; width:0% }
+.audio-controls { display:flex; align-items:center; gap:2px; flex-shrink:0 }
+.audio-btn { background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer; padding:4px; display:flex; align-items:center; justify-content:center; transition:color 0.15s }
+.audio-btn:hover, .audio-btn.active { color:#fff }
+.audio-btn svg { width:26px; height:26px }
+#audioPlay svg { width:34px; height:34px }
+</style>
+</head>
+<body>
+
+<!-- Click to enter -->
+<div id="enter-overlay">
+  <div class="enter-text">click to enter...</div>
+</div>
+
+<!-- Background -->
+<video class="bg-video" src="https://r2.guns.lol/cfc39d2b-3ba5-43d6-869d-380aaffebcb8.mp4" autoplay loop muted playsinline disablepictureinpicture preload="auto"></video>
+
+<!-- Volume control -->
+<div class="volume-control" id="volumeControl">
+  <div class="volume-icon" id="volumeIcon">
+    <svg id="volSvg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <mask id="vm-on">
+          <g fill="none" stroke="#fff" stroke-width="4">
+            <path fill="#555" stroke-linejoin="round" d="M24 6v36c-7 0-12.201-9.16-12.201-9.16H6a2 2 0 0 1-2-2V17.01a2 2 0 0 1 2-2h5.799S17 6 24 6Z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M32 15a11.91 11.91 0 0 1 1.684 1.859A12.07 12.07 0 0 1 36 24c0 2.654-.846 5.107-2.278 7.09A11.936 11.936 0 0 1 32 33"/>
+            <path stroke-linecap="round" d="M34.236 41.186C40.084 37.696 44 31.305 44 24c0-7.192-3.796-13.496-9.493-17.02"/>
+          </g>
+        </mask>
+        <mask id="vm-mute">
+          <g fill="none" stroke="#fff" stroke-width="4">
+            <path fill="#555" stroke-linejoin="round" d="M24 6v36c-7 0-12.201-9.16-12.201-9.16H6a2 2 0 0 1-2-2V17.01a2 2 0 0 1 2-2h5.799S17 6 24 6Z"/>
+            <path stroke-linecap="round" d="m33 19 10 10m0-10L33 29"/>
+          </g>
+        </mask>
+      </defs>
+      <path id="volPath" fill="currentColor" d="M0 0h48v48H0z" mask="url(#vm-on)"/>
+    </svg>
+  </div>
+  <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100">
+</div>
+
+<!-- Page content -->
+<div id="page-content">
+
+  <!-- Profile card -->
+  <div class="card" id="profileCard">
+
+    <div class="avatar-wrap">
+      <img class="avatar-deco" src="https://cdn.discordapp.com/avatar-decoration-presets/a_3c97a2d37f433a7913a1c7b7a735d000.png" alt="">
+      <img class="avatar" id="mainAvatar" src="https://cdn.discordapp.com/avatars/745298901069725717/c16d622ce447f43b769eb644928be90f.webp" alt="Aziz">
+    </div>
+
+    <div class="profile-info">
+      <h1 class="display-name">Aziz ♡</h1>
+      <h3 class="bio">₍⑅ᐢ..ᐢ₎</h3>
+      <span class="location">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="4 2 16 20" fill="currentColor"><path d="M12 12q.825 0 1.413-.587T14 10t-.587-1.412T12 8t-1.412.588T10 10t.588 1.413T12 12m0 10q-4.025-3.425-6.012-6.362T4 10.2q0-3.75 2.413-5.975T12 2t5.588 2.225T20 10.2q0 2.5-1.987 5.438T12 22"/></svg>
+        Home
+      </span>
+    </div>
+
+    <div class="discord-presence">
+      <div class="presence-avatar-wrap">
+        <img class="presence-avatar" id="presenceAvatar" src="https://cdn.discordapp.com/avatars/745298901069725717/c16d622ce447f43b769eb644928be90f.webp" alt="">
+        <img class="presence-status-img" id="presenceDot" src="https://assets.guns.lol/online.png" alt="">
+      </div>
+      <div class="presence-info">
+        <div class="presence-top">
+          <span class="presence-name">0xi7</span>
+          <span class="clan-tag">
+            <img src="https://cdn.discordapp.com/clan-badges/1456995923497586761/ef2a3fc0af5f102af252f87b323681c1.png" alt="">
+            VLR
+          </span>
+          <div class="discord-badges">
+            <img src="https://cdn.discordapp.com/badge-icons/8a88d63823d8a71cd5e390baa45efa02.png" title="HypeSquad Bravery" alt="">
+            <img src="https://cdn.discordapp.com/badge-icons/6bdc42827a38498929a4920da12695d9.png" title="Active Developer" alt="">
+            <img src="https://cdn.discordapp.com/badge-icons/2ba85e8026a8614b640c2837bcdfe21b.png" title="Discord Nitro" alt="">
+          </div>
+        </div>
+        <div class="presence-status" id="presenceStatus">currently doing nothing</div>
+      </div>
+      <img class="presence-activity-img" id="activityImg" src="" alt="">
+    </div>
+
+    <div class="anon-section">
+      <div class="anon-label">Send anonymous message / أرسل رسالة مجهولة</div>
+      <div class="anon-form">
+        <textarea class="anon-textarea" id="anonMsg" placeholder="Your message... / رسالتك..." maxlength="500" rows="3"></textarea>
+        <button class="anon-send" id="anonBtn">Send / إرسال</button>
+        <div class="anon-msg" id="anonStatus"></div>
+      </div>
+    </div>
+
+    <div class="socials">
+      <a class="social-btn" href="https://discord.com/users/745298901069725717" target="_blank" rel="noopener">
+        <svg viewBox="1.96 4.26 20.03 15.53" fill="currentColor"><path d="M14.82 4.26a10.14 10.14 0 0 0-.53 1.1a14.66 14.66 0 0 0-4.58 0a10.14 10.14 0 0 0-.53-1.1a16 16 0 0 0-4.13 1.3a17.33 17.33 0 0 0-3 11.59a16.6 16.6 0 0 0 5.07 2.59A12.89 12.89 0 0 0 8.23 18a9.65 9.65 0 0 1-1.71-.83a3.39 3.39 0 0 0 .42-.33a11.66 11.66 0 0 0 10.12 0q.21.18.42.33a10.84 10.84 0 0 1-1.71.84a12.41 12.41 0 0 0 1.08 1.78a16.44 16.44 0 0 0 5.06-2.59a17.22 17.22 0 0 0-3-11.59a16.09 16.09 0 0 0-4.09-1.35zM8.68 14.81a1.94 1.94 0 0 1-1.8-2a1.93 1.93 0 0 1 1.8-2a1.93 1.93 0 0 1 1.8 2a1.93 1.93 0 0 1-1.8 2zm6.64 0a1.94 1.94 0 0 1-1.8-2a1.93 1.93 0 0 1 1.8-2a1.92 1.92 0 0 1 1.8 2a1.92 1.92 0 0 1-1.8 2z"/></svg>
+      </a>
+      <a class="social-btn" href="https://instagram.com/xu7ii11" target="_blank" rel="noopener">
+        <svg viewBox="3 2.98 18.01 18.04" fill="currentColor"><path d="M20.947 8.305a6.53 6.53 0 0 0-.419-2.216a4.61 4.61 0 0 0-2.633-2.633a6.606 6.606 0 0 0-2.186-.42c-.962-.043-1.267-.055-3.709-.055s-2.755 0-3.71.055a6.606 6.606 0 0 0-2.185.42a4.607 4.607 0 0 0-2.633 2.633a6.554 6.554 0 0 0-.419 2.185c-.043.963-.056 1.268-.056 3.71s0 2.754.056 3.71c.015.748.156 1.486.419 2.187a4.61 4.61 0 0 0 2.634 2.632a6.584 6.584 0 0 0 2.185.45c.963.043 1.268.056 3.71.056s2.755 0 3.71-.056a6.59 6.59 0 0 0 2.186-.419a4.615 4.615 0 0 0 2.633-2.633c.263-.7.404-1.438.419-2.187c.043-.962.056-1.267.056-3.71c-.002-2.442-.002-2.752-.058-3.709zm-8.953 8.297c-2.554 0-4.623-2.069-4.623-4.623s2.069-4.623 4.623-4.623a4.623 4.623 0 0 1 0 9.246zm4.807-8.339a1.077 1.077 0 0 1-1.078-1.078a1.077 1.077 0 1 1 2.155 0c0 .596-.482 1.078-1.077 1.078z"/><circle cx="11.994" cy="11.979" r="3.003"/></svg>
+      </a>
+      <a class="social-btn" href="https://discord.gg/hme" target="_blank" rel="noopener">
+        <img src="https://r2.guns.lol/8e819c5c-f6aa-461c-9414-17159e98cf3a.webp" alt="">
+      </a>
+    </div>
+
+    <div class="views-count">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"/></svg>
+      <span id="viewCount">272</span>
+    </div>
+
+  </div>
+
+  <!-- Audio card -->
+  <div class="card" id="audioCard">
+    <img class="audio-cover" id="audioCover" src="https://r2.guns.lol/f19b181b-79b6-4119-8379-067194695866.webp" alt="">
+    <div class="audio-info">
+      <div class="audio-title" id="audioTitle">⛦</div>
+      <div class="audio-row">
+        <span class="audio-time-txt" id="audioCur">0:00</span>
+        <div class="audio-progress" id="audioProgress">
+          <div class="audio-progress-fill" id="audioFill"></div>
+        </div>
+        <span class="audio-time-txt" id="audioDur">0:00</span>
+      </div>
+    </div>
+    <div class="audio-controls">
+      <button class="audio-btn" id="audioPrev">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 6c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1s-1-.45-1-1V7c0-.55.45-1 1-1m3.66 6.82l5.77 4.07c.66.47 1.58-.01 1.58-.82V7.93c0-.81-.91-1.28-1.58-.82l-5.77 4.07a1 1 0 0 0 0 1.64"/></svg>
+      </button>
+      <button class="audio-btn active" id="audioPlay">
+        <svg id="audioPlayIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/></svg>
+      </button>
+      <button class="audio-btn" id="audioNext">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="m7.58 16.89l5.77-4.07c.56-.4.56-1.24 0-1.63L7.58 7.11C6.91 6.65 6 7.12 6 7.93v8.14c0 .81.91 1.28 1.58.82M16 7v10c0 .55.45 1 1 1s1-.45 1-1V7c0-.55-.45-1-1-1s-1 .45-1 1"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<audio id="bgAudio" loop></audio>
+
+<script>
+(function(){
+
+// Click to enter
+var overlay=document.getElementById('enter-overlay');
+var pageContent=document.getElementById('page-content');
+var volCtrl=document.getElementById('volumeControl');
+var bgAudio=document.getElementById('bgAudio');
+var entered=false;
+
+overlay.addEventListener('click',function(){
+  if(entered) return;
+  entered=true;
+  overlay.style.display='none';
+  pageContent.classList.add('visible');
+  volCtrl.classList.add('visible');
+  document.getElementById('viewCount').textContent='...';
+  fetch('/.netlify/functions/views',{method:'POST'})
+    .then(function(r){return r.json()})
+    .then(function(d){if(d.count!=null) document.getElementById('viewCount').textContent=d.count})
+    .catch(function(){document.getElementById('viewCount').textContent='?'});
+  bgAudio.play().then(function(){playing=true;audioPlayIcon.innerHTML=pauseSVG}).catch(function(){});
+});
+
+// Audio
+var tracks=[
+  {url:"https://r2.guns.lol/61665d8c-5ba6-4ffa-b746-ee0cc675fec0.mp3",title:"⛦",cover:"https://r2.guns.lol/f19b181b-79b6-4119-8379-067194695866.webp"},
+  {url:"https://r2.guns.lol/446e555c-10b6-40b5-9009-7093157413f2.mp3",title:"⛦",cover:"https://r2.guns.lol/48b92653-242a-47d4-8494-b770ce2cd64a.webp"}
+];
+var cur=0,playing=false;
+var fill=document.getElementById('audioFill');
+var curEl=document.getElementById('audioCur');
+var durEl=document.getElementById('audioDur');
+var titleEl=document.getElementById('audioTitle');
+var coverEl=document.getElementById('audioCover');
+var playBtn=document.getElementById('audioPlay');
+var audioPlayIcon=document.getElementById('audioPlayIcon');
+var pauseSVG='<path d="M14 19V5h4v14zm-8 0V5h4v14z"/>';
+var playSVG='<path d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/>';
+
+function fmt(s){var m=Math.floor(s/60),sec=Math.floor(s%60);return m+":"+(sec<10?"0":"")+sec}
+function loadTrack(i){
+  var t=tracks[i];titleEl.textContent=t.title;coverEl.src=t.cover;bgAudio.src=t.url;
+  if(playing) bgAudio.play().catch(function(){});
+}
+bgAudio.addEventListener('timeupdate',function(){
+  if(!bgAudio.duration) return;
+  fill.style.width=(bgAudio.currentTime/bgAudio.duration*100)+'%';
+  curEl.textContent=fmt(bgAudio.currentTime);
+  durEl.textContent=fmt(bgAudio.duration);
+});
+bgAudio.addEventListener('ended',function(){cur=(cur+1)%tracks.length;loadTrack(cur)});
+playBtn.addEventListener('click',function(){
+  if(playing){bgAudio.pause();playing=false;audioPlayIcon.innerHTML=playSVG}
+  else{bgAudio.play().then(function(){playing=true;audioPlayIcon.innerHTML=pauseSVG}).catch(function(){})}
+});
+document.getElementById('audioPrev').addEventListener('click',function(){cur=(cur-1+tracks.length)%tracks.length;loadTrack(cur)});
+document.getElementById('audioNext').addEventListener('click',function(){cur=(cur+1)%tracks.length;loadTrack(cur)});
+document.getElementById('audioProgress').addEventListener('click',function(e){
+  if(!bgAudio.duration) return;
+  var rect=this.getBoundingClientRect();
+  bgAudio.currentTime=(e.clientX-rect.left)/rect.width*bgAudio.duration;
+});
+loadTrack(cur);
+
+// Volume
+var volPath=document.getElementById('volPath');
+var volSlider=document.getElementById('volumeSlider');
+var lastVol=100, muted=false;
+function updateVolIcon(v){
+  volPath.setAttribute('mask', v===0 ? 'url(#vm-mute)' : 'url(#vm-on)');
+}
+volSlider.addEventListener('input',function(){
+  var v=parseInt(this.value);
+  bgAudio.volume=v/100;
+  muted=(v===0);
+  lastVol=v>0?v:lastVol;
+  updateVolIcon(v);
+});
+document.getElementById('volumeIcon').addEventListener('click',function(){
+  if(muted||bgAudio.volume===0){
+    bgAudio.volume=lastVol/100;
+    volSlider.value=lastVol;
+    muted=false;
+    updateVolIcon(lastVol);
+  } else {
+    lastVol=parseInt(volSlider.value)||100;
+    bgAudio.volume=0;
+    volSlider.value=0;
+    muted=true;
+    updateVolIcon(0);
+  }
+});
+
+// Anonymous message
+var btn=document.getElementById('anonBtn');
+var msgEl=document.getElementById('anonMsg');
+var statusEl=document.getElementById('anonStatus');
+var remaining=3,cooldown=false;
+btn.addEventListener('click',function(){
+  var msg=msgEl.value.trim();
+  if(!msg){statusEl.textContent="⚠ Write a message first";statusEl.className="anon-msg err";return}
+  if(msg.length>500){statusEl.textContent="Too long";statusEl.className="anon-msg err";return}
+  if(cooldown){statusEl.textContent="Wait a moment";statusEl.className="anon-msg err";return}
+  btn.disabled=true;statusEl.textContent="";statusEl.className="anon-msg";
+  fetch('/.netlify/functions/send-message',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){
+      msgEl.value="";remaining--;
+      if(remaining<=0){
+        cooldown=true;btn.disabled=true;var t=300;
+        var iv=setInterval(function(){
+          t--;statusEl.textContent="Wait "+t+"s";statusEl.className="anon-msg err";
+          if(t<=0){clearInterval(iv);cooldown=false;remaining=3;btn.disabled=false;statusEl.textContent="";statusEl.className="anon-msg"}
+        },1000);
+      }else{btn.disabled=false;statusEl.textContent="✓ Sent ("+remaining+" left)";statusEl.className="anon-msg ok"}
+    }else if(d.error==="banned"){
+      statusEl.textContent="🚫 Blocked";statusEl.className="anon-msg err";btn.disabled=true;
+    }else if(d.error==="rate_limit"){
+      statusEl.textContent="Too many messages";statusEl.className="anon-msg err";btn.disabled=false;
+    }else{
+      statusEl.textContent="Error, try again";statusEl.className="anon-msg err";btn.disabled=false;
+    }
+  })
+  .catch(function(){statusEl.textContent="Connection error";statusEl.className="anon-msg err";btn.disabled=false});
+});
+
+// Lanyard
+var DISCORD_ID="745298901069725717";
+
+function setStatusColor(s){
+  var imgs={online:'https://assets.guns.lol/online.png',idle:'https://assets.guns.lol/idle.png',dnd:'https://assets.guns.lol/dnd.png',offline:'https://assets.guns.lol/offline.png'};
+  var src=imgs[s]||imgs.offline;
+  document.getElementById('presenceDot').src=src;
+}
+function updatePresence(data){
+  setStatusColor(data.discord_status||'offline');
+  if(data.discord_user&&data.discord_user.avatar){
+    var av='https://cdn.discordapp.com/avatars/'+DISCORD_ID+'/'+data.discord_user.avatar+'.webp';
+    document.getElementById('mainAvatar').src=av;
+    document.getElementById('presenceAvatar').src=av;
+  }
+  // Avatar decoration
+  var decoEl=document.querySelector('.avatar-deco');
+  if(data.discord_user&&data.discord_user.avatar_decoration_data&&data.discord_user.avatar_decoration_data.asset){
+    var asset=data.discord_user.avatar_decoration_data.asset;
+    var decoUrl= asset.startsWith('a_')
+      ? 'https://cdn.discordapp.com/avatar-decoration-presets/'+asset+'.png'
+      : 'https://cdn.discordapp.com/avatar-decoration-presets/'+asset+'.png';
+    decoEl.src=decoUrl;
+    decoEl.style.display='block';
+  } else {
+    decoEl.style.display='none';
+  }
+  var activities=data.activities||[];
+  var cs=null, spotify=null, activity=null;
+  for(var i=0;i<activities.length;i++){
+    var a=activities[i];
+    if(a.type===4) cs=a;
+    else if(a.id==='spotify:1') spotify=a;
+    else if((a.type===0||a.type===1||a.type===2||a.type===3||a.type===5)&&!activity) activity=a;
+  }
+
+  var actImg=document.getElementById('activityImg');
+  var statusEl=document.getElementById('presenceStatus');
+
+  if(spotify){
+    actImg.src='https://i.scdn.co/image/'+spotify.assets.large_image.replace('spotify:','');
+    actImg.style.display='block';
+    statusEl.innerHTML='<span class="activity-type">Listening to</span> '+spotify.details+' by '+(spotify.state||'').replace(/;/g,',');
+  } else if(activity){
+    var typeLabel={0:'Playing',1:'Streaming',2:'Listening to',3:'Watching',5:'Competing in'}[activity.type]||'';
+    var imgUrl='';
+    if(activity.assets&&activity.assets.large_image){
+      var li=activity.assets.large_image;
+      if(li.startsWith('mp:external/')) imgUrl='https://media.discordapp.net/external/'+li.replace('mp:external/','');
+      else imgUrl='https://cdn.discordapp.com/app-assets/'+activity.application_id+'/'+li+'.png';
+    }
+    if(imgUrl){ actImg.src=imgUrl; actImg.style.display='block'; }
+    else actImg.style.display='none';
+    statusEl.innerHTML='<span class="activity-type">'+typeLabel+'</span> '+activity.name+(activity.details?' — '+activity.details:'');
+  } else if(cs){
+    actImg.style.display='none';
+    var em='';
+    if(cs.emoji&&!cs.emoji.id&&cs.emoji.name) em=cs.emoji.name;
+    statusEl.innerHTML=(em?em+' ':'')+(cs.state||'currently doing nothing');
+  } else {
+    actImg.style.display='none';
+    statusEl.innerHTML='currently doing nothing';
+  }
+}
+function connectLanyard(){
+  var ws=new WebSocket('wss://api.lanyard.rest/socket');
+  var hb;
+  ws.onmessage=function(e){
+    var msg=JSON.parse(e.data);
+    if(msg.op===1){
+      ws.send(JSON.stringify({op:2,d:{subscribe_to_id:DISCORD_ID}}));
+      hb=setInterval(function(){ws.send(JSON.stringify({op:3}))},msg.d.heartbeat_interval);
+    }else if(msg.op===0){updatePresence(msg.d)}
+  };
+  ws.onclose=function(){clearInterval(hb);setTimeout(connectLanyard,5000)};
+  ws.onerror=function(){ws.close()};
+}
+connectLanyard();
+
+// Circular favicon
+(function(){
+  var img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=function(){
+    var c=document.createElement('canvas');
+    c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.beginPath();ctx.arc(32,32,32,0,Math.PI*2);ctx.closePath();ctx.clip();
+    ctx.drawImage(img,0,0,64,64);
+    document.getElementById('favicon').href=c.toDataURL();
+  };
+  img.src='https://cdn.discordapp.com/avatars/745298901069725717/c16d622ce447f43b769eb644928be90f.webp';
+})();
+
+// Typewriter title
+(function(){
+  var chars=['@','A','z','i','z',' ','\u2661'];
+  var i=1, deleting=false, nextAt=Date.now();
+  function tick(){
+    var now=Date.now();
+    if(now>=nextAt){
+      document.title=chars.slice(0,i).join('');
+      if(!deleting){
+        if(i>=chars.length){ deleting=true; nextAt=now+1800; }
+        else { i++; nextAt=now+150; }
+      } else {
+        if(i<=1){ deleting=false; nextAt=now+600; }
+        else { i--; nextAt=now+80; }
+      }
+    }
+    setTimeout(tick,50);
+  }
+  tick();
+})();
+
+})();
+</script>
+</body>
+</html>

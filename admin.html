@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080808;--card:rgba(27,27,27,0.6);--border:rgba(255,255,255,0.08);--text:#fff;--muted:rgba(255,255,255,0.45);--accent:#1d62b7;--danger:#ef4444;--success:#22c55e}
+html,body{min-height:100vh;background:var(--bg);font-family:'Onest',sans-serif;color:var(--text)}
+body{display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:520px}
+.panel{background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:16px;padding:28px 24px;animation:fadeIn 0.4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h1{font-size:20px;font-weight:600;margin-bottom:20px;text-align:center;color:var(--text)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:'Onest',sans-serif;font-size:14px;padding:9px 12px;outline:none;transition:border-color 0.2s}
+.field input:focus{border-color:rgba(255,255,255,0.2)}
+.btn{width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-family:'Onest',sans-serif;font-size:14px;font-weight:500;padding:10px;cursor:pointer;transition:background 0.2s}
+.btn:hover{background:rgba(255,255,255,0.18)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.btn-danger{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3)}
+.btn-danger:hover{background:rgba(239,68,68,0.25)}
+.btn-success{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.3)}
+.btn-success:hover{background:rgba(34,197,94,0.25)}
+.msg{font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+.msg.ok{color:var(--success)}
+.msg.err{color:var(--danger)}
+.section-title{font-size:13px;font-weight:500;color:var(--muted);margin:20px 0 10px;text-transform:uppercase;letter-spacing:0.05em}
+.banned-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto}
+.banned-item{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px}
+.banned-ip{font-family:monospace;font-size:12px;color:var(--muted)}
+.unbtn{background:none;border:1px solid rgba(34,197,94,0.3);border-radius:6px;color:var(--success);font-size:11px;font-family:'Onest',sans-serif;padding:3px 8px;cursor:pointer;transition:background 0.15s}
+.unbtn:hover{background:rgba(34,197,94,0.15)}
+.ban-form{display:flex;gap:8px;margin-top:10px}
+.ban-form input{flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;color:#fff;font-family:monospace;font-size:13px;padding:7px 10px;outline:none}
+.ban-form button{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;font-size:12px;font-family:'Onest',sans-serif;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.ban-form button:hover{background:rgba(239,68,68,0.25)}
+.empty-state{text-align:center;color:var(--muted);font-size:13px;padding:16px 0}
+.logout-btn{background:none;border:none;color:var(--muted);font-size:12px;font-family:'Onest',sans-serif;cursor:pointer;margin-top:16px;display:block;width:100%;text-align:center;text-decoration:underline}
+.logout-btn:hover{color:var(--text)}
+#loginPanel{display:block}
+#adminPanel{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="loginPanel" class="panel">
+    <h1>Admin Login</h1>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn" id="loginBtn">Login</button>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+
+  <div id="adminPanel" class="panel">
+    <h1>Admin Panel</h1>
+
+    <div class="section-title">Banned IPs / الـ IPs المحظورة</div>
+    <div class="banned-list" id="bannedList">
+      <div class="empty-state">Loading...</div>
+    </div>
+
+    <div class="ban-form">
+      <input type="text" id="banIpInput" placeholder="IP address to ban">
+      <button id="banBtn">Ban</button>
+    </div>
+    <div class="msg" id="banMsg"></div>
+
+    <div class="section-title" style="margin-top:24px">Info</div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6">Messages are sent directly to your Discord DM. After banning an IP, update the <code style="font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px">BANNED_IPS</code> environment variable in Netlify with the value shown below.</p>
+    <div id="bannedRaw" style="margin-top:8px;font-family:monospace;font-size:11px;background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;word-break:break-all;color:var(--muted);min-height:28px"></div>
+
+    <button class="logout-btn" id="logoutBtn">Logout / تسجيل الخروج</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var token=null;
+
+  function api(path,method,body){
+    var opts={method:method||"GET",headers:{"Content-Type":"application/json"}};
+    if(token)opts.headers["Authorization"]="Bearer "+token;
+    if(body)opts.body=JSON.stringify(body);
+    return fetch("/.netlify/functions/"+path,opts).then(function(r){return r.json()});
+  }
+
+  var loginBtn=document.getElementById("loginBtn");
+  var passInput=document.getElementById("passInput");
+  var loginMsg=document.getElementById("loginMsg");
+
+  passInput.addEventListener("keydown",function(e){if(e.key==="Enter")loginBtn.click()});
+
+  loginBtn.addEventListener("click",function(){
+    var pass=passInput.value;
+    if(!pass){loginMsg.textContent="Enter password";loginMsg.className="msg err";return}
+    loginBtn.disabled=true;loginMsg.textContent="";
+    api("admin-login","POST",{password:pass})
+    .then(function(d){
+      if(d.token){
+        token=d.token;
+        sessionStorage.setItem("__at",token);
+        showAdmin();
+      }else{
+        loginMsg.textContent="Wrong password / كلمة مرور خاطئة";
+        loginMsg.className="msg err";
+        loginBtn.disabled=false;
+      }
+    })
+    .catch(function(){
+      loginMsg.textContent="Error / خطأ";
+      loginMsg.className="msg err";
+      loginBtn.disabled=false;
+    });
+  });
+
+  function showAdmin(){
+    document.getElementById("loginPanel").style.display="none";
+    document.getElementById("adminPanel").style.display="block";
+    loadBanned();
+  }
+
+  function loadBanned(){
+    api("get-messages","GET")
+    .then(function(d){
+      var list=document.getElementById("bannedList");
+      var raw=document.getElementById("bannedRaw");
+      var ips=d.banned_ips||[];
+      raw.textContent=ips.join(",")||"(none)";
+      if(!ips.length){list.innerHTML='<div class="empty-state">No banned IPs / لا يوجد محظورون</div>';return}
+      list.innerHTML="";
+      ips.forEach(function(ip){
+        var item=document.createElement("div");
+        item.className="banned-item";
+        item.innerHTML='<span class="banned-ip">'+escHtml(ip)+'</span><button class="unbtn" data-ip="'+escHtml(ip)+'">Unban</button>';
+        item.querySelector(".unbtn").addEventListener("click",function(){
+          doUnban(this.dataset.ip);
+        });
+        list.appendChild(item);
+      });
+    })
+    .catch(function(){});
+  }
+
+  function doUnban(ip){
+    api("ban-user","POST",{ip:ip,action:"unban"})
+    .then(function(d){
+      if(d.ok){
+        showBanMsg("Unbanned: "+ip,"ok");
+        updateEnvNote(d.banned);
+        loadBanned();
+      }
+    })
+    .catch(function(){});
+  }
+
+  var banBtn=document.getElementById("banBtn");
+  var banIpInput=document.getElementById("banIpInput");
+  var banMsg=document.getElementById("banMsg");
+
+  banBtn.addEventListener("click",function(){
+    var ip=(banIpInput.value||"").trim();
+    if(!ip){showBanMsg("Enter an IP / أدخل IP","err");return}
+    api("ban-user","POST",{ip:ip,action:"ban"})
+    .then(function(d){
+      if(d.ok){
+        banIpInput.value="";
+        showBanMsg("Banned: "+ip,"ok");
+        updateEnvNote(d.banned);
+        loadBanned();
+      }else{
+        showBanMsg("Failed / فشل","err");
+      }
+    })
+    .catch(function(){showBanMsg("Error / خطأ","err")});
+  });
+
+  function updateEnvNote(list){
+    document.getElementById("bannedRaw").textContent=(list||[]).join(",")||"(none)";
+  }
+
+  function showBanMsg(txt,type){
+    banMsg.textContent=txt;
+    banMsg.className="msg "+type;
+    setTimeout(function(){banMsg.textContent="";banMsg.className="msg"},3000);
+  }
+
+  function escHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click",function(){
+    token=null;
+    sessionStorage.removeItem("__at");
+    document.getElementById("adminPanel").style.display="none";
+    document.getElementById("loginPanel").style.display="block";
+    passInput.value="";
+    loginMsg.textContent="";
+    loginBtn.disabled=false;
+  });
+
+  var saved=sessionStorage.getItem("__at");
+  if(saved){token=saved;showAdmin()}
+})();
+</script>
+</body>
+</html>
